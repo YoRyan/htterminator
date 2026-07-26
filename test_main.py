@@ -92,9 +92,9 @@ def client_connection(
     method: str,
     path: str,
 ):
-    proxy_addr, proxy_port = proxy_server.server_address
+    proxy_addr, proxy_port = proxy_server.server_address # type: ignore[misc]
     conn = http.client.HTTPConnection(typ.cast(str, proxy_addr), proxy_port)
-    data_addr, data_port = data_server.server_address
+    data_addr, data_port = data_server.server_address # type: ignore[misc]
     conn.request(method, f"http://{typ.cast(str, data_addr)}:{data_port}/{path}")
     return conn
 
