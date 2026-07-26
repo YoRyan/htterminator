@@ -46,19 +46,6 @@ def data_server():
     thread.join()
 
 
-def client_connection(
-    proxy_server: http.server.HTTPServer,
-    data_server: http.server.HTTPServer,
-    method: str,
-    path: str,
-):
-    proxy_addr, proxy_port = proxy_server.server_address
-    conn = http.client.HTTPConnection(typ.cast(str, proxy_addr), proxy_port)
-    data_addr, data_port = data_server.server_address
-    conn.request(method, f"http://{typ.cast(str, data_addr)}:{data_port}/{path}")
-    return conn
-
-
 class TestSingleSession:
     def test_read_index_html(
         self, proxy_server: http.server.HTTPServer, data_server: http.server.HTTPServer
@@ -97,6 +84,19 @@ class TestSingleSession:
 
         with open(TESTDATA / "generated.json", "r") as f:
             assert lines_equal(f, (l.decode("utf-8") for l in resp))
+
+
+def client_connection(
+    proxy_server: http.server.HTTPServer,
+    data_server: http.server.HTTPServer,
+    method: str,
+    path: str,
+):
+    proxy_addr, proxy_port = proxy_server.server_address
+    conn = http.client.HTTPConnection(typ.cast(str, proxy_addr), proxy_port)
+    data_addr, data_port = data_server.server_address
+    conn.request(method, f"http://{typ.cast(str, data_addr)}:{data_port}/{path}")
+    return conn
 
 
 def lines_equal(a: typ.Iterable[str], b: typ.Iterable[str]):
