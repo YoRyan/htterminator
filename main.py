@@ -14,13 +14,24 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         with self.browser.new_page() as page:
-            page.goto(self.path)
-            content = page.content()
+            response = page.goto(self.path)
+            if response is None:
+                self.send_response(HTTPStatus.GONE)
+                self.end_headers()
+            else:
+                self.send_response(response.status)
 
-        self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", "text/html")
-        self.end_headers()
-        self.wfile.write(content.encode("utf-8"))
+                content_type = (
+                    response.header_value("content-type") or "application/octet-stream"
+                )
+                self.send_header("Content-Type", content_type)
+
+                self.end_headers()
+
+                if content_type == "text/html":
+                    self.wfile.write(page.content().encode("utf-8"))
+                else:
+                    self.wfile.write(response.body())
 
 
 def main() -> None:
